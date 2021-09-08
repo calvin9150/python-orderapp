@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+
+    <title>스파르타코딩클럽 | python+ec2 연습하기</title>
+
+    <meta property="og:title" content="피자시키기" />
+    <meta property="og:description" content="보고 있는 페이지의 내용 요약" />
+    <meta property="og:image" content="{{ url_for('static', filename='ogimage.png') }}" />
+  </head>
+
+  <style>
+    .container {
+      margin: auto;
+    }
+
+    .pic {
+      width: 500px;
+      height: 300px;
+      margin: auto;
+    }
+
+    .pic img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .exp {
+    }
+
+    .sub {
+      font-size: 50px;
+      font-weight: 1000;
+    }
+
+    .order-box {
+      margin: 20px 0 20px;
+    }
+
+    .order {
+      font-size: 50px;
+      font-weight: 1000;
+    }
+
+    label {
+      width: 100px;
+    }
+
+    .orderBtn {
+      display: block;
+      margin: auto;
+      font-size: 30px;
+    }
+
+    .dropdown {
+      display: inline;
+    }
+
+    .exchange {
+      color: blue;
+    }
+  </style>
+  <script>
+    function exchange() {
+      $.ajax({
+        type: "GET",
+        url: "http://spartacodingclub.shop/sparta_api/rate",
+        data: {},
+        success: function (response) {
+          let rate = response.rate;
+          console.log(rate);
+          const exchange_html = `원-달러 환율 : ${rate}`;
+          $(".exchange").text(exchange_html);
+        },
+      });
+    }
+
+    function makeOrder() {
+      let name = $('#name').val()
+      let number = $('#number').val()
+      let address = $('#address').val()
+      let phone = $('#phone').val()
+
+      $.ajax({
+        type: "POST",
+        url: "/order",
+        data: {name_give: name, number_give: number, address_give: address, phone_give:phone},
+        success: function (response) {
+          alert(response["msg"]);
+          window.location.reload();
+        }
+      })
+    }
+
+    function showReview() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let orders = response['all_orders']
+                    for (let i = 0; i < orders.length; i++) {
+                        let name = orders[i]['name']
+                        let number = orders[i]['number']
+                        let address = orders[i]['address']
+                        let phone = orders[i]['phone']
+
+                        let temp_html = `<tr>
+                                          <td>${name}</td>
+                                          <td>${number}</td>
+                                          <td>${address}</td>
+                                          <td>${phone}</td>
+                                        </tr>`
+                        $('#orderlist').append(temp_html)
+                    }
+                }
+            })
+        }
+
+    $(document).ready(exchange);
+    $(document).ready(showReview);
+  </script>
+
+  <body>
+    <div class="container">
+      <div class="pic">
+        <img
+          src="https://thumb.mt.co.kr/06/2019/07/2019071208263242231_2.jpg/dims/optimize/"
+        />
+      </div>
+      <div class="exp">
+        <span class="sub">상품제목</span>
+        <span class="price">가격 : 1,000,000원 / 개</span>
+        <div class="content">
+          피자는 밀가루 반죽 위에 토마토 소스와 모차렐라 치즈를 얹어서 둥글고
+          납작한 형태로 구운 빵으로 문화와 기호에 따라서 올리브, 고기, 살라미,
+          해산물, 치즈, 채소 등을 비롯한 다양한 종류의 토핑을 선택하여 얹을 수
+          있다.
+        </div>
+        <div class="exchange"></div>
+      </div>
+      <div class="order-box">
+        <div class="order">주문하기</div>
+        <label>주문자 성함 :</label>
+        <input type="text" id="name" />
+        <br />
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01">수량</label>
+            </div>
+            <select id="number" class="custom-select">
+                <option selected>-- 수량을 선택하세요 --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <br />
+        <label>주소 :</label>
+        <input type="text" id="address"/>
+        <br />
+        <label>전화번호 :</label>
+        <input type="text" id="phone"/>
+      </div>
+      <button class="orderBtn" onclick="makeOrder()">주문하기</button>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">이름</th>
+              <th scope="col">수량</th>
+              <th scope="col">주소</th>
+              <th scope="col">전화번호</th>
+            </tr>
+          </thead>
+          <tbody id="orderlist">
+
+
+          </tbody>
+        </table>
+    </div>
+  </body>
+</html>
